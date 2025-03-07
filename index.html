@@ -28,6 +28,13 @@
     .copy-btn {
       margin-left: 10px;
     }
+    /* Toast positioning */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1050;
+    }
   </style>
 </head>
 <body>
@@ -53,6 +60,28 @@
           <div class="text-muted mb-3" id="totalItems"></div>
           <ul class="list-group" id="randomizedList"></ul>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container">
+    <div id="copySuccessToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header bg-success text-white">
+        <strong class="me-auto">Success</strong>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        List copied to clipboard!
+      </div>
+    </div>
+    <div id="copyFailToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header bg-danger text-white">
+        <strong class="me-auto">Error</strong>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        Failed to copy list. Please copy manually.
       </div>
     </div>
   </div>
@@ -109,10 +138,9 @@
       // Use modern clipboard API if available
       if (navigator.clipboard) {
         navigator.clipboard.writeText(textToCopy).then(() => {
-          alert('List copied to clipboard!');
+          showToast('copySuccessToast'); // Show success toast
         }).catch(() => {
-          // Fallback to older method if clipboard API fails
-          copyToClipboardFallback(textToCopy);
+          showToast('copyFailToast'); // Show fail toast
         });
       } else {
         // Fallback to older method if clipboard API is not supported
@@ -129,12 +157,22 @@
       textarea.select();
       try {
         document.execCommand('copy');
-        alert('List copied to clipboard!');
+        showToast('copySuccessToast'); // Show success toast
       } catch (err) {
-        alert('Failed to copy list. Please copy manually.');
+        showToast('copyFailToast'); // Show fail toast
       } finally {
         document.body.removeChild(textarea);
       }
+    }
+
+    // Function to show a toast
+    function showToast(toastId) {
+      const toastElement = document.getElementById(toastId);
+      const toast = new bootstrap.Toast(toastElement, {
+        autohide: true,
+        delay: 3000, // Hide after 3 seconds
+      });
+      toast.show();
     }
 
     // Function to shuffle an array
